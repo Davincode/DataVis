@@ -39,7 +39,8 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 	private int timestamp = 0;
 	private int chosen = -1;
 	
-	private List<List<Integer>> data;
+	//private List<List<Integer>> data;
+	private Data data;
 	private List<RectF> rects;
 	private List<Integer> offsets;
 	private List<Paint> paints;
@@ -50,7 +51,8 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 		getHolder().addCallback(this);
 		this.activity = activity;
 		
-		data = new ArrayList<List<Integer>>();
+		//data = new ArrayList<List<Integer>>();
+		data = new Data();
 		rects = new ArrayList<RectF>();
 		offsets = new ArrayList<Integer>();
 		paints = new ArrayList<Paint>();
@@ -81,48 +83,20 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 		loadDataSet();
 	}
 	
-	private void loadData() {
-		for (int i = 0; i < original_data.length; i++)
-		{
-			ArrayList<Integer> values = new ArrayList<Integer>();
-			for (int j = 0; j < original_data[i].length; j++)
-			{
-				values.add(original_data[i][j]);
-			}
-			data.add(values);
-		}
-	}
-	
-	private void loadData_2() {
-		for (int i = 0; i < original_data_2.length; i++)
-		{
-			ArrayList<Integer> values = new ArrayList<Integer>();
-			for (int j = 0; j < original_data_2[i].length; j++)
-			{
-				values.add(original_data_2[i][j]);
-			}
-			data.add(values);
-		}
-	}
-	
 	private void loadDataSet() {
-		int maxValue = Integer.MIN_VALUE;
+		
+		data.loadData(original_data);
+		
+		int maxValue = 0;
 		for (int i = 0; i < original_data.length; i++)
 		{
-			ArrayList<Integer> values = new ArrayList<Integer>();
 			for (int j = 0; j < original_data[i].length; j++)
 			{
-				int current = original_data[i][j];
-				values.add(current);
-				if(j != 0)
+				if(original_data[i][j] > maxValue)
 				{
-					if(current > maxValue)
-					{
-						maxValue = current;
-					}
+					maxValue = original_data[i][j];
 				}
 			}
-			data.add(values);
 		}
 		
 		int range = maxValue / 5;
@@ -151,23 +125,18 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 	}
 	
 	private void loadDataSet_2() {
-		int maxValue = Integer.MIN_VALUE;
+		data.loadData(original_data_2);
+		
+		int maxValue = 0;
 		for (int i = 0; i < original_data_2.length; i++)
 		{
-			ArrayList<Integer> values = new ArrayList<Integer>();
 			for (int j = 0; j < original_data_2[i].length; j++)
 			{
-				int current = original_data_2[i][j];
-				values.add(current);
-				if(j != 0)
+				if(original_data_2[i][j] > maxValue)
 				{
-					if(current > maxValue)
-					{
-						maxValue = current;
-					}
+					maxValue = original_data_2[i][j];
 				}
 			}
-			data.add(values);
 		}
 		
 		int range = maxValue / 5;
@@ -196,20 +165,21 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 		}
 	}
 	
-	public synchronized void reloadData() {
-		data.clear();
+	public void reloadData() {
+		data.EmptyData();
 		if (timestamp % 2 == 1)
 		{
-			loadData_2();
+			data.loadData(original_data_2);
 		}
 		else
 		{
-			loadData();
+			data.loadData(original_data);
 		}
 	}
 	
-	public synchronized void changeDataSet(){
-		data.clear();
+	public void changeDataSet(){
+		data.EmptyData();
+		
 		countries.clear();
 		offsets.clear();
 		rects.clear();
@@ -286,13 +256,14 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 			}
 		}
 		
-		for (int i = 0; i < data.size(); i++)
+		List<List<Integer>> temp = data.getData();
+		for (int i = 0; i < temp.size(); i++)
 		{
 			float position = origin.x + i * (num_countries * width + interval) + offset 
-					+ (num_countries * width - paint.measureText(Integer.toString(data.get(i).get(0)))) / 2;
+					+ (num_countries * width - paint.measureText(Integer.toString(temp.get(i).get(0)))) / 2;
 			if (position >= origin.x && position < legend.x)
 			{
-				canvas.drawText(Integer.toString(data.get(i).get(0)), position , origin.y + 20, paint);
+				canvas.drawText(Integer.toString(temp.get(i).get(0)), position , origin.y + 20, paint);
 			}
 			
 			int num_visible = 0;
@@ -303,7 +274,7 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 				{
 					float left = origin.x + i * (num_countries * width + interval) + num_visible * width + offset;
 					float right = origin.x + i * (num_countries * width + interval) + (num_visible + 1) * width + offset;
-					float top = origin.y - data.get(i).get(j+1) / (float)magnitude * 100;
+					float top = origin.y - temp.get(i).get(j+1) / (float)magnitude * 100;
 					float bottom = origin.y;
 				
 					if (left >= origin.x && right < legend.x)
@@ -316,12 +287,12 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 							}
 							else
 							{
-								if(data.get(i).get(j+1) < chosen * 10)
+								if(temp.get(i).get(j+1) < chosen * 10)
 								{
-									top = origin.y - data.get(i).get(j+1) / (float)magnitude * (500 / chosen);
+									top = origin.y - temp.get(i).get(j+1) / (float)magnitude * (500 / chosen);
 									canvas.drawRect(left, top, right, bottom, paints.get(j));
 								}
-								else if (data.get(i).get(j+1) == chosen * 10)
+								else if (temp.get(i).get(j+1) == chosen * 10)
 								{
 									canvas.drawRect(left, origin.y - 500, right, bottom, paints.get(j));
 								}
@@ -329,7 +300,7 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 						}
 						else
 						{ 
-							float offset = paint.measureText(Integer.toString(data.get(i).get(1)));
+							float offset = paint.measureText(Integer.toString(temp.get(i).get(1)));
 							//canvas.drawRect(left, top, right, bottom, paint);
 							
 							if(chosen == -1)
@@ -338,18 +309,18 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 							}
 							else
 							{
-								if(data.get(i).get(j+1) < chosen * 10)
+								if(temp.get(i).get(j+1) < chosen * 10)
 								{
-									top = origin.y - data.get(i).get(j+1) / (float)magnitude * (500 / chosen);
+									top = origin.y - temp.get(i).get(j+1) / (float)magnitude * (500 / chosen);
 									canvas.drawRect(left, top, right, bottom, paint);
 								}
-								else if(data.get(i).get(j+1) == chosen * 10)
+								else if(temp.get(i).get(j+1) == chosen * 10)
 								{
 									canvas.drawRect(left, origin.y - 500, right, bottom, paint);
 								}
 							}
 							
-							canvas.drawText(Integer.toString(data.get(i).get(j+1)), (left + right - offset) / 2, top - 10, paint);
+							canvas.drawText(Integer.toString(temp.get(i).get(j+1)), (left + right - offset) / 2, top - 10, paint);
 						}
 					}
 					
@@ -471,6 +442,8 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 			y = event.getY();
 		}
 		
+		List<List<Integer>> temp = data.getData();
+		
 		if(event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_POINTER_DOWN)
 		{
 			moveFlag=false;
@@ -481,12 +454,12 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 				
 			if (gesture == GESTURE.NONE)
 			{	
-				for (int i = 0; i < data.size(); i++)
+				for (int i = 0; i < temp.size(); i++)
 				{
 					float left = origin.x + i * (num_countries * width + interval) + offset;
 					float right = origin.x + i * (num_countries * width + interval) + num_countries * width + offset;
 					float top = origin.y;
-					float maxvalue = Math.max(data.get(i).get(1), Math.max(data.get(i).get(2), data.get(i).get(3)));
+					float maxvalue = Math.max(temp.get(i).get(1), Math.max(temp.get(i).get(2), temp.get(i).get(3)));
 					if (x > left && x > origin.x && x < right && x < legend.x && y > origin.y - maxvalue / (float)magnitude * 100 && y < top)
 					{
 						selected[i] = true;
@@ -515,12 +488,12 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 						}
 						else if (Math.abs(x-xPre) < 10 && y-yPre > 0)
 						{
-							for (int i = 0; i < data.size(); i++)
+							for (int i = 0; i < temp.size(); i++)
 							{
 								float left = origin.x + i * (num_countries * width + interval) + offset;
 								float right = origin.x + i * (num_countries * width + interval) + num_countries * width + offset;
 								float top = origin.y;
-								float maxvalue = Math.max(data.get(i).get(1), Math.max(data.get(i).get(2), data.get(i).get(3)));
+								float maxvalue = Math.max(temp.get(i).get(1), Math.max(temp.get(i).get(2), temp.get(i).get(3)));
 								if (x > left && x < right && y > origin.y - maxvalue / (float)magnitude * 100 && y < top && remove_index == -1)
 								{
 									remove_index = i;
@@ -529,7 +502,7 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 							}
 							if (y > origin.y && remove_index != -1)
 							{
-								data.remove(remove_index);
+								data.removeData(remove_index);
 								remove_index = -1;
 								Arrays.fill(selected, Boolean.FALSE);
 							}
@@ -543,7 +516,7 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 					{
 						float newLineDistance = (float) Math.sqrt(Math.pow(p - x, 2) + Math.pow(q - y, 2));
 						
-						for (int i = 0; i < data.size(); i++)
+						for (int i = 0; i < temp.size(); i++)
 						{
 							float left = origin.x + i * (num_countries * width + interval) + offset;
 							float right = origin.x + (i + 1)  * (num_countries * width + interval) + offset;
@@ -613,7 +586,7 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 				}
 				else
 				{
-					for (int i = 0; i < data.size(); i++)
+					for (int i = 0; i < temp.size(); i++)
 					{
 						float left = origin.x + i * (num_countries * width + interval) + offset;
 						float right = origin.x + i * (num_countries * width + interval) + num_countries * width + offset;
