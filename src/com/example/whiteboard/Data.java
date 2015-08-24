@@ -16,7 +16,7 @@ public class Data {
 	{
 		for (int i = 0; i < original_data.length; i++)
 		{
-			ArrayList<Integer> values = new ArrayList<Integer>();
+			List<Integer> values = new ArrayList<Integer>();
 			for (int j = 0; j < original_data[i].length; j++)
 			{
 				values.add(original_data[i][j]);
@@ -30,7 +30,7 @@ public class Data {
 		List<List<Integer>> temp = new ArrayList<List<Integer>>();
 		for (int i = 0; i < data.size(); i++)
 		{
-			ArrayList<Integer> values = new ArrayList<Integer>();
+			List<Integer> values = new ArrayList<Integer>();
 			for (int j = 0; j < data.get(i).size(); j++)
 			{
 				values.add(data.get(i).get(j));

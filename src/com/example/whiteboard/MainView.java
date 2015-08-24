@@ -287,12 +287,12 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 							}
 							else
 							{
-								if(temp.get(i).get(j+1) < chosen * 10)
+								if(temp.get(i).get(j+1) < chosen * magnitude)
 								{
 									top = origin.y - temp.get(i).get(j+1) / (float)magnitude * (500 / chosen);
 									canvas.drawRect(left, top, right, bottom, paints.get(j));
 								}
-								else if (temp.get(i).get(j+1) == chosen * 10)
+								else if (temp.get(i).get(j+1) == chosen * magnitude)
 								{
 									canvas.drawRect(left, origin.y - 500, right, bottom, paints.get(j));
 								}
@@ -309,12 +309,12 @@ public class MainView extends SurfaceView implements SurfaceHolder.Callback{
 							}
 							else
 							{
-								if(temp.get(i).get(j+1) < chosen * 10)
+								if(temp.get(i).get(j+1) < chosen * magnitude)
 								{
 									top = origin.y - temp.get(i).get(j+1) / (float)magnitude * (500 / chosen);
 									canvas.drawRect(left, top, right, bottom, paint);
 								}
-								else if(temp.get(i).get(j+1) == chosen * 10)
+								else if(temp.get(i).get(j+1) == chosen * magnitude)
 								{
 									canvas.drawRect(left, origin.y - 500, right, bottom, paint);
 								}
